@@ -497,6 +497,26 @@
             let studentRows = []; // array of row objects
             let lastLookupId = ''; // last looked up ID to avoid duplicate work
 
+            // Reusable CSV line splitter (handles basic quotes and commas)
+            function splitCSVLine(line) {
+                const out = [];
+                let cur = '';
+                let inQ = false;
+                for (let i = 0; i < line.length; i++) {
+                    const ch = line[i];
+                    if (ch === '"') {
+                        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+                        else inQ = !inQ;
+                    } else if (ch === ',' && !inQ) {
+                        out.push(cur); cur = '';
+                    } else {
+                        cur += ch;
+                    }
+                }
+                out.push(cur);
+                return out.map(s => s.trim());
+            }
+
             // CSV fetch + parse helper (simple, robust)
             async function fetchStudents() {
                 if (studentRows.length) return studentRows;
@@ -512,25 +532,6 @@
                 // We'll map by index. We must know their positions in the CSV.
                 // If your CSV includes all columns A.. etc, map by index accordingly:
                 // Let's defensively split and index.
-                function splitCSVLine(line) {
-                    // Light parser: split by comma, handle basic quoted fields
-                    const out = [];
-                    let cur = '';
-                    let inQ = false;
-                    for (let i = 0; i < line.length; i++) {
-                        const ch = line[i];
-                        if (ch === '"') {
-                            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
-                            else inQ = !inQ;
-                        } else if (ch === ',' && !inQ) {
-                            out.push(cur); cur = '';
-                        } else {
-                            cur += ch;
-                        }
-                    }
-                    out.push(cur);
-                    return out.map(s => s.trim());
-                }
 
                 // We don't know exact column count/order beyond your mapping, so we'll derive indices once from header row if it exists.
                 // If the published CSV includes headers, use them; otherwise, fall back to fixed positions.
@@ -827,14 +828,6 @@
                 } else if (refundsCheckbox.checked) {
                     pillRefunds.classList.add('active');
                 }
-                
-                // Debug logging
-                console.log('Pills updated:', {
-                    payments: paymentsCheckbox.checked,
-                    refunds: refundsCheckbox.checked,
-                    pillPaymentsActive: pillPayments.classList.contains('active'),
-                    pillRefundsActive: pillRefunds.classList.contains('active')
-                });
             }
 
             // Radio change handlers (mutual exclusivity handled by radio itself)
