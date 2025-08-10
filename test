@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Transaction</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: #f7f7fb;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 24px;
+        }
+        .form-container {
+            max-width: 760px;
+            width: 100%;
+            border: 1px solid #e6e6ef;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+        }
+        .header-bg {
+            background: linear-gradient(180deg, #4285F4 0%, #3b78e7 100%);
+            color: #fff;
+            border-radius: 16px 16px 0 0;
+        }
+        /* Fields */
+        .field-label {
+            display: block;
+            color: #111827;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+        .required-label::after {
+            content: '*';
+            color: #ea4335;
+            margin-left: 4px;
+        }
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 14px;
+            transition: box-shadow .2s, border-color .2s, background-color .2s;
+            background: #fff;
+        }
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #4285F4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.18);
+        }
+        /* Toggle pills for Type */
+        .type-toggle {
+            display: inline-flex;
+            gap: 8px;
+            background: #f3f4f6;
+            border-radius: 999px;
+            padding: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+            color: #374151;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all .2s ease;
+            user-select: none;
+            position: relative;
+        }
+        .pill:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+        .pill.active {
+            background: #e8f1ff !important;
+            color: #0b57d0 !important;
+            border-color: #93c5fd !important;
+            box-shadow: 0 0 0 3px rgba(66,133,244,0.18);
+        }
+        .pill input {
+            display: none;
+        }
+        /* Input groups (prefix) */
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .input-prefix {
+            background: #f9fafb;
+            color: #6b7280;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-right: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        .input-group input {
+            border: none;
+            outline: none;
+            padding: 12px 14px;
+            width: 100%;
+        }
+        .input-group:focus-within {
+            border-color: #4285F4;
+            box-shadow: 0 0 0 3px rgba(66,133,244,0.18);
+        }
+        /* Section spacing */
+        .section {
+            padding: 0 24px 24px;
+        }
+        .section + .section {
+            border-top: 1px dashed #e5e7eb;
+            padding-top: 24px;
+        }
+        /* Buttons */
+        .btn {
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-weight: 600;
+            transition: transform .15s ease, box-shadow .15s ease, background .2s, color .2s;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.08);
+        }
+        .btn:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .btn-clear {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+        .btn-clear:hover {
+            background: #e5e7eb;
+        }
+        .btn-save {
+            background: #4285F4;
+            color: #fff;
+        }
+        .btn-save:hover {
+            background: #3b78e7;
+        }
+        /* Message box */
+        #messageBox {
+            margin: 16px 24px 24px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        #messageBox.bg-green-100 {
+            border: 1px solid #86efac;
+        }
+        #messageBox.bg-red-100 {
+            border: 1px solid #fca5a5;
+        }
+        /* Helper text for errors */
+        .helper {
+            margin-top: 6px;
+            font-size: 0.82rem;
+            color: #dc2626;
+            display: none;
+        }
+        .has-error input,
+        .has-error select,
+        .has-error .input-group {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+        }
+        .has-error .helper {
+            display: block;
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+            .section {
+                padding: 0 16px 20px;
+            }
+            #messageBox {
+                margin: 12px 16px 20px;
+            }
+            .type-toggle {
+                gap: 6px;
+            }
+            .pill {
+                padding: 8px 12px;
+            }
+        }
+
+        /* Inline select styling when multiple matches are found */
+        .inline-select {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fff;
+        }
+        .inline-select:focus {
+            outline: none;
+            border-color: #4285F4;
+            box-shadow: 0 0 0 3px rgba(66,133,244,0.18);
+        }
+
+        .fee-summary {
+            margin: 0 24px 8px;
+            border: 1px solid #e6e6ef;
+            border-radius: 12px;
+            background: #fff;
+            overflow: hidden;
+        }
+        .fee-summary-header {
+            background: #f9fafb;
+            padding: 10px 12px;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 1px solid #e6e6ef;
+        }
+        .fee-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .fee-summary-table th,
+        .fee-summary-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .fee-summary-table th {
+            font-size: 0.88rem;
+            color: #6b7280;
+            font-weight: 700;
+        }
+        .fee-summary-table td {
+            font-size: 0.95rem;
+            color: #111827;
+            font-weight: 700;
+        }
+        .fee-muted {
+            color: #6b7280;
+            font-weight: 600;
+        }
+        .fee-due {
+            color: #b45309;
+            font-weight: 800;
+        }
+        @media (max-width: 640px) {
+            .fee-summary { margin: 0 16px 8px; }
+        }
+
+        /* Success Card Styles */
+        .success-card {
+            margin: 16px 24px 24px;
+            border: 1px solid #e6e6ef;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 8px 24px rgba(16,24,40,0.06);
+            overflow: hidden;
+        }
+        .success-card-header {
+            background: #ecfdf5;
+            color: #065f46;
+            border-bottom: 1px solid #d1fae5;
+            padding: 12px 16px;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+        .success-card-body {
+            padding: 14px 16px;
+            color: #111827;
+        }
+        .success-card-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.95rem;
+            margin: 8px 0;
+        }
+        .success-card-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding: 12px 16px 16px;
+            border-top: 1px dashed #e5e7eb;
+        }
+        .btn-wa {
+            background: #25D366;
+            color: #fff;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-weight: 700;
+        }
+        .btn-wa:hover { background: #1fb457; }
+        .btn-done {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-weight: 700;
+        }
+        @media (max-width: 640px) {
+            .success-card { margin: 12px 16px 20px; }
+            .success-card-row { flex-direction: column; gap: 4px; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-8 form-container">
+        <!-- Header Section -->
+        <div class="header-bg p-6 mb-10 text-center">
+            <h1 class="text-3xl font-bold tracking-normal">New Transaction</h1>
+        </div>
+
+        <!-- Form Section -->
+        <form id="transactionForm" class="grid grid-cols-1 gap-y-6">
+            <!-- Section: Transaction Type -->
+            <div class="section">
+                <div class="mb-3">
+                    <label class="field-label required-label">Type</label>
+                </div>
+                <div class="type-toggle" role="group" aria-label="Transaction type">
+                    <label class="pill" id="pillPayments">
+                        <input type="radio" id="payments" name="type" value="Payments" />
+                        <span>PAYMENTS</span>
+                    </label>
+                    <label class="pill" id="pillRefunds">
+                        <input type="radio" id="refunds" name="type" value="Refunds" />
+                        <span>REFUNDS</span>
+                    </label>
+                </div>
+                <p class="helper" id="typeHelper">Please select either PAYMENTS or REFUNDS.</p>
+            </div>
+
+            <!-- Section: Student & Course -->
+            <div class="section grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                <div id="field-studentId">
+                    <label for="studentId" class="field-label required-label">Student ID</label>
+                    <input type="text" id="studentId" name="studentId" required>
+                    <p class="helper">Student ID is required</p>
+                </div>
+
+                <div id="field-studentName">
+                    <label for="studentName" class="field-label required-label">Student Name</label>
+                    <input type="text" id="studentName" name="studentName" required>
+                    <p class="helper">Student name is required</p>
+                </div>
+
+                <div id="field-courseName">
+                    <label for="courseName" class="field-label required-label">Course Name</label>
+                    <input type="text" id="courseName" name="courseName" required>
+                    <p class="helper">Course name is required</p>
+            </div>
+
+                <div id="field-batchNo">
+                    <label for="batchNo" class="field-label required-label">Batch No.</label>
+                    <input type="text" id="batchNo" name="batchNo" required>
+                    <p class="helper">Batch number is required</p>
+                </div>
+            </div>
+
+            <!-- Section: Payment Details -->
+            <div class="section grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                <!-- Fees/Paid/Due summary -->
+                <div class="fee-summary" id="feeSummary" style="display:none;">
+                    <div class="fee-summary-header">Payment Summary</div>
+                    <table class="fee-summary-table">
+                        <thead>
+                            <tr>
+                                <th>Fees</th>
+                                <th>Paid</th>
+                                <th>Due</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span id="feeTotal" class="fee-muted">—</span></td>
+                                <td><span id="feePaid" class="fee-muted">—</span></td>
+                                <td><span id="feeDue" class="fee-due">—</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="field-amount">
+                    <label for="amount" class="field-label required-label">Amount</label>
+                    <div class="input-group">
+                        <span class="input-prefix">₹</span>
+                        <input type="text" id="amount" name="amount" inputmode="decimal" placeholder="0.00" required>
+                    </div>
+                    <p class="helper">Enter a valid amount</p>
+            </div>
+
+                <div id="field-modeOfPayment">
+                    <label for="modeOfPayment" class="field-label required-label">Mode Of Payment</label>
+                    <select id="modeOfPayment" name="modeOfPayment" required>
+                    <option value="">Select Mode</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Online Transfer">Online Transfer</option>
+                    <option value="Card">Card</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="UPI">UPI</option>
+                </select>
+                    <p class="helper">Please select a mode</p>
+            </div>
+
+                <div id="field-paymentType">
+                    <label for="paymentType" class="field-label required-label">Payment Type</label>
+                    <select id="paymentType" name="paymentType" required>
+                    <option value="">Select Payment Type</option>
+                    <option value="Token Amount">Token Amount</option>
+                    <option value="First Instalment">First Instalment</option>
+                    <option value="Part Instalment">Part Instalment</option>
+                        <option value="Final Instalment">Final Instalment</option>
+                    <option value="Full Payment">Full Payment</option>
+                </select>
+                    <p class="helper">Please select a payment type</p>
+            </div>
+
+                <div id="field-txId">
+                    <label for="txId" class="field-label required-label">Tx ID</label>
+                    <div class="input-group">
+                        <span class="input-prefix">TX</span>
+                        <input type="text" id="txId" name="txId" placeholder="Reference / UTR / Cheque No." required>
+            </div>
+                    <p class="helper">Transaction reference is required</p>
+            </div>
+
+                <div id="field-dateOfPayment">
+                    <label for="dateOfPayment" class="field-label required-label">Date Of Payment</label>
+                    <input type="date" id="dateOfPayment" name="dateOfPayment" required>
+                    <p class="helper">Please select a date</p>
+            </div>
+
+                <div id="field-note">
+                    <label for="note" class="field-label required-label">Note</label>
+                    <input type="text" id="note" name="note" placeholder="Short note (e.g., Part payment via UPI)" required>
+                    <p class="helper">Note is required</p>
+            </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="section flex justify-end gap-3">
+                <button type="button" id="clearButton" class="btn btn-clear">Clear</button>
+                <button type="submit" id="saveButton" class="btn btn-save">Save</button>
+            </div>
+        </form>
+
+        <!-- Message Box (errors/infos) -->
+        <div id="messageBox" class="hidden" role="alert"></div>
+        
+        <!-- Success Card mount point -->
+        <div id="successCardMount"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('transactionForm');
+            const clearButton = document.getElementById('clearButton');
+            const messageBox = document.getElementById('messageBox');
+            const paymentsCheckbox = document.getElementById('payments');
+            const refundsCheckbox = document.getElementById('refunds');
+            const pillPayments = document.getElementById('pillPayments');
+            const pillRefunds = document.getElementById('pillRefunds');
+
+            // IMPORTANT: This has been updated with your deployed Google Apps Script Web App URL
+            const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzjQ9vYDF9n-qbbjVn0FcBY7UjY-Rs0mHXRfqRGNaTBPzCSoevnnr77Cba_yLim8rCr/exec';
+
+            // Live validation constants and cache
+            const STUDENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=1820019961&single=true&output=csv';
+
+            // Success card constants
+            const WPPAYMENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=384282536&single=true&output=csv';
+
+            // In-memory cache
+            let studentRows = []; // array of row objects
+            let lastLookupId = ''; // last looked up ID to avoid duplicate work
+
+            // CSV fetch + parse helper (simple, robust)
+            async function fetchStudents() {
+                if (studentRows.length) return studentRows;
+                const res = await fetch(STUDENTS_CSV_URL, { cache: 'no-store' });
+                const text = await res.text();
+
+                // Parse CSV (handles simple CSV with commas; if your data has quoted commas, we can switch to a safer parser)
+                const lines = text.split(/\r?\n/).filter(Boolean);
+                const header = lines.shift(); // first row header (ignored since you gave fixed columns)
+                
+                // Columns you specified:
+                // B: Student ID, C: Student Name, H: Batch No., J: Course Name
+                // We'll map by index. We must know their positions in the CSV.
+                // If your CSV includes all columns A.. etc, map by index accordingly:
+                // Let's defensively split and index.
+                function splitCSVLine(line) {
+                    // Light parser: split by comma, handle basic quoted fields
+                    const out = [];
+                    let cur = '';
+                    let inQ = false;
+                    for (let i = 0; i < line.length; i++) {
+                        const ch = line[i];
+                        if (ch === '"') {
+                            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+                            else inQ = !inQ;
+                        } else if (ch === ',' && !inQ) {
+                            out.push(cur); cur = '';
+                        } else {
+                            cur += ch;
+                        }
+                    }
+                    out.push(cur);
+                    return out.map(s => s.trim());
+                }
+
+                // We don't know exact column count/order beyond your mapping, so we'll derive indices once from header row if it exists.
+                // If the published CSV includes headers, use them; otherwise, fall back to fixed positions.
+                const headerCells = header ? splitCSVLine(header) : [];
+                // Try to find headers (case-insensitive)
+                const idx = {
+                    studentId: headerCells.findIndex(h => /student\sid/i.test(h)),
+                    studentName: headerCells.findIndex(h => /student\sname/i.test(h)),
+                    batchNo: headerCells.findIndex(h => /batch/i.test(h)),
+                    courseName: headerCells.findIndex(h => /course\s*name/i.test(h)),
+                };
+
+                // Fallback positions if header not found:
+                // Assuming columns A.. etc: B=1, C=2, H=7, J=9, L=11, M=12 (0-based indexing)
+                const fallback = { studentId: 1, studentName: 2, batchNo: 7, courseName: 9, fees: 11, paid: 12 };
+
+                const idCol = idx.studentId >= 0 ? idx.studentId : fallback.studentId;
+                const nameCol = idx.studentName >= 0 ? idx.studentName : fallback.studentName;
+                const batchCol = idx.batchNo >= 0 ? idx.batchNo : fallback.batchNo;
+                const courseCol = idx.courseName >= 0 ? idx.courseName : fallback.courseName;
+                const feesCol = idx.fees >= 0 ? idx.fees : fallback.fees;
+                const paidCol = idx.paid >= 0 ? idx.paid : fallback.paid;
+
+                studentRows = lines.map(line => {
+                    const cells = splitCSVLine(line);
+                    return {
+                        studentId: (cells[idCol] || '').trim(),
+                        studentName: (cells[nameCol] || '').trim(),
+                        batchNo: (cells[batchCol] || '').trim(),
+                        courseName: (cells[courseCol] || '').trim(),
+                        fees: (cells[feesCol] || '').trim(),
+                        paid: (cells[paidCol] || '').trim(),
+                    };
+                }).filter(r => r.studentId); // keep only rows with ID
+                return studentRows;
+            }
+
+            // CSV fetcher by header (reuse your splitCSVLine)
+            async function fetchCSV(url) {
+                const res = await fetch(url, { cache: 'no-store' });
+                const text = await res.text();
+                const lines = text.split(/\r?\n/).filter(Boolean);
+                const headerLine = lines.shift() || '';
+                const headerCells = splitCSVLine(headerLine);
+                const rows = lines.map(line => {
+                    const cells = splitCSVLine(line);
+                    const obj = {};
+                    headerCells.forEach((h, i) => { obj[h] = (cells[i] || '').trim(); });
+                    return obj;
+                });
+                return { header: headerCells, rows };
+            }
+
+            // Utility to find the last appended row by referenceId
+            function normalizeMoneyStr(v) { 
+                return (v || '').toString().replace(/[,₹\s]/g, ''); 
+            }
+
+            function findMatchingRow(rows, data) {
+                // Try to match on these keys present in sheet headers:
+                // "type","studentId","amount","txId","courseName","batchNo","dateOfPayment","studentName"
+                const sig = {
+                    type: (data.type || '').trim(),
+                    studentId: (data.studentId || '').trim(),
+                    studentName: (data.studentName || '').trim(),
+                    txId: (data.txId || '').trim(),
+                    courseName: (data.courseName || '').trim(),
+                    batchNo: (data.batchNo || '').trim(),
+                    dateOfPayment: (data.dateOfPayment || '').trim(),
+                    amount: normalizeMoneyStr(data.amount || '')
+                };
+                // Filter candidates
+                const candidates = rows.filter(r => {
+                    const rAmount = normalizeMoneyStr(r.amount || r.Amount || r['Amount'] || '');
+                    return (
+                        ((r.type || r.Type || '') === sig.type) &&
+                        ((r.studentId || r['Student ID'] || r.StudentId || '') === sig.studentId) &&
+                        ((r.txId || r['txId'] || r['Tx ID'] || '') === sig.txId) &&
+                        ((r.courseName || r['Course Name'] || '') === sig.courseName) &&
+                        ((r.batchNo || r['Batch No.'] || r['Batch No'] || '') === sig.batchNo) &&
+                        ((r.dateOfPayment || r['Date Of Payment'] || '') === sig.dateOfPayment) &&
+                        (rAmount === sig.amount)
+                    );
+                });
+                // Pick the last occurrence (most recent append)
+                return candidates.length ? candidates[candidates.length - 1] : null;
+            }
+
+            // Get phone and due from metaData (students CSV you're already using)
+            function extractPhoneFromMeta(row) {
+                return row['Phone'] || row['phone'] || row['Mobile'] || row['mobile'] || row['Contact'] || '';
+            }
+            
+            function parseNum(v) {
+                if (v == null) return 0;
+                const s = String(v).replace(/[,₹\s]/g, '');
+                const n = parseFloat(s);
+                return isNaN(n) ? 0 : n;
+            }
+
+            async function computePhoneAndDue(studentId, courseName) {
+                // Reuse the same CSV already used for student lookup: STUDENTS_CSV_URL
+                const { rows } = await fetchCSV(STUDENTS_CSV_URL);
+                // Match by Student ID (case-insensitive). If multiple rows, pick those with same courseName if provided.
+                const matches = rows.filter(r => (r['Student ID'] || r.studentId || '').toString().toLowerCase() === (studentId || '').toString().toLowerCase());
+                if (!matches.length) return { phone: '', due: 0 };
+                let courseMatches = matches;
+                if (courseName) {
+                    courseMatches = matches.filter(r => (r['Course Name'] || r.courseName || '').toLowerCase() === courseName.toLowerCase()) || matches;
+                }
+                // Phone: first non-empty
+                const phone = extractPhoneFromMeta(courseMatches.find(r => extractPhoneFromMeta(r)) || {}) || extractPhoneFromMeta(matches) || '';
+                // Fees (L) and Paid (M). Try headers; fallback to common names
+                // We previously mapped fallback L=Fees, M=Paid; here try by header label:
+                const totalFees = courseMatches.reduce((sum, r) => sum + parseNum(r['Fees Amount'] || r['Fees'] || r['fees'] || r['L'] || r['feesAmount'] || r['Fee'] || r['fee']), 0);
+                const totalPaid = courseMatches.reduce((sum, r) => sum + parseNum(r['Paid Amount'] || r['Paid'] || r['paid'] || r['M'] || r['paidAmount']), 0);
+                const due = Math.max(totalFees - totalPaid, 0);
+                return { phone, due };
+            }
+
+            // Render success card and WhatsApp link
+            function renderSuccessCard({ receiptLink, phone, due }) {
+                const mount = document.getElementById('successCardMount');
+                if (!mount) return;
+                
+                const dt = new Date();
+                const dateTimeStr = dt.toLocaleString('en-IN', { hour12: true });
+
+                const text = `Great news! Your payment receipt is ready—check out the attached link! ${receiptLink} Current status: Balance Due — ₹${due}. Don't worry, you're just a click away from wrapping this up.`;
+
+                // Normalize phone: expect something like "91XXXXXXXXXX". If phone already includes country code, use as-is; else prefix 91.
+                let phoneStr = (phone || '').replace(/\D/g, '');
+                if (phoneStr && !phoneStr.startsWith('91')) phoneStr = '91' + phoneStr;
+
+                const waHref = phoneStr
+                    ? `https://wa.me/${phoneStr}?text=${encodeURIComponent(text)}`
+                    : '';
+
+                mount.innerHTML = `
+                    <div class="success-card">
+                        <div class="success-card-header">Payment Recorded Successfully</div>
+                        <div class="success-card-body">
+                            <div class="success-card-row">
+                                <div>Date & Time</div>
+                                <div><strong>${dateTimeStr}</strong></div>
+                            </div>
+                            <div class="success-card-row" style="align-items:flex-start;">
+                                <div>Message</div>
+                                <div><strong>Data submitted successfully! Receipt is ready.</strong></div>
+                            </div>
+                        </div>
+                        <div class="success-card-actions">
+                            <a id="btnWaShare" class="btn btn-wa" target="_blank" rel="noopener">
+                                Share Receipt via WhatsApp
+                            </a>
+                            <button id="btnDone" type="button" class="btn btn-done">Done</button>
+                        </div>
+                    </div>
+                `;
+
+                const waBtn = document.getElementById('btnWaShare');
+                if (waBtn) {
+                    if (waHref) {
+                        waBtn.setAttribute('href', waHref);
+                    } else {
+                        waBtn.setAttribute('href', '#');
+                        waBtn.setAttribute('disabled', 'true');
+                        waBtn.style.opacity = '.6';
+                        waBtn.textContent = 'WhatsApp not available';
+                    }
+                }
+                
+                const doneBtn = document.getElementById('btnDone');
+                if (doneBtn) {
+                    doneBtn.addEventListener('click', () => {
+                        mount.innerHTML = '';
+                    });
+                }
+            }
+
+            // Helpers
+            function showMessage(message, type = 'success') {
+                messageBox.textContent = message;
+                messageBox.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-100', 'text-green-800');
+                } else {
+                    messageBox.classList.add('bg-red-100', 'text-red-800');
+                }
+                setTimeout(() => messageBox.classList.add('hidden'), 5000);
+            }
+
+            function setError(id, hasError) {
+                const wrap = document.getElementById(id);
+                if (!wrap) return;
+                wrap.classList.toggle('has-error', !!hasError);
+            }
+
+            // UI helpers for error/clear on lookup
+            function setFieldValue(id, value) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.value = value || '';
+            }
+
+            function clearSelectIfAny(containerId) {
+                const wrap = document.getElementById(containerId);
+                if (!wrap) return;
+                const existing = wrap.querySelector('select.inline-select');
+                if (existing) existing.remove();
+            }
+
+            function mountInlineSelect(containerId, options, onChange) {
+                const wrap = document.getElementById(containerId);
+                if (!wrap) return;
+
+                clearSelectIfAny(containerId);
+
+                const sel = document.createElement('select');
+                sel.className = 'inline-select';
+                sel.innerHTML = ['<option value="">Select</option>']
+                    .concat(options.map(o => `<option value="${o}">${o}</option>`))
+                    .join('');
+                sel.addEventListener('change', () => {
+                    onChange(sel.value);
+                });
+                wrap.appendChild(sel);
+                return sel;
+            }
+
+            // Fee summary helpers
+            const feeSummaryEl = document.getElementById('feeSummary');
+            const feeTotalEl = document.getElementById('feeTotal');
+            const feePaidEl = document.getElementById('feePaid');
+            const feeDueEl = document.getElementById('feeDue');
+
+            function parseMoney(v) {
+                if (typeof v !== 'string') v = String(v ?? '');
+                v = v.replace(/[,₹\s]/g, '');
+                const n = parseFloat(v);
+                return isNaN(n) ? 0 : n;
+            }
+
+            function formatMoney(n) {
+                try {
+                    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n);
+                } catch {
+                    return '₹' + (n.toFixed(2));
+                }
+            }
+
+            function hideFeeSummary() {
+                if (feeSummaryEl) feeSummaryEl.style.display = 'none';
+            }
+
+            function showFeeSummary() {
+                if (feeSummaryEl) feeSummaryEl.style.display = '';
+            }
+
+            function updateFeeSummaryForMatches(matches, selectedCourse) {
+                if (!matches || matches.length === 0) {
+                    hideFeeSummary();
+                    return;
+                }
+                // Filter to selected course if provided
+                let rows = matches;
+                if (selectedCourse) {
+                    rows = matches.filter(r => (r.courseName || '').toLowerCase() === selectedCourse.toLowerCase());
+                }
+
+                // Aggregate fees/paid across rows of the selected course
+                let totalFees = 0;
+                let totalPaid = 0;
+                rows.forEach(r => {
+                    totalFees += parseMoney(r.fees);
+                    totalPaid += parseMoney(r.paid);
+                });
+                const due = Math.max(totalFees - totalPaid, 0);
+
+                feeTotalEl.textContent = formatMoney(totalFees);
+                feePaidEl.textContent = formatMoney(totalPaid);
+                feeDueEl.textContent = formatMoney(due);
+                showFeeSummary();
+            }
+
+            function toggleTypePills() {
+                // Remove active class from both pills first
+                pillPayments.classList.remove('active');
+                pillRefunds.classList.remove('active');
+                
+                // Add active class to the checked one
+                if (paymentsCheckbox.checked) {
+                    pillPayments.classList.add('active');
+                } else if (refundsCheckbox.checked) {
+                    pillRefunds.classList.add('active');
+                }
+                
+                // Debug logging
+                console.log('Pills updated:', {
+                    payments: paymentsCheckbox.checked,
+                    refunds: refundsCheckbox.checked,
+                    pillPaymentsActive: pillPayments.classList.contains('active'),
+                    pillRefundsActive: pillRefunds.classList.contains('active')
+                });
+            }
+
+            // Radio change handlers (mutual exclusivity handled by radio itself)
+            paymentsCheckbox.addEventListener('change', toggleTypePills);
+            refundsCheckbox.addEventListener('change', toggleTypePills);
+
+            // Clicking the pill toggles the radio (helps older iOS)
+            pillPayments.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') paymentsCheckbox.checked = true;
+                toggleTypePills();
+                paymentsCheckbox.dispatchEvent(new Event('change'));
+            });
+            pillRefunds.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') refundsCheckbox.checked = true;
+                toggleTypePills();
+                refundsCheckbox.dispatchEvent(new Event('change'));
+            });
+
+            // Prevent Enter key on text inputs from accidental submit
+            form.querySelectorAll('input[type="text"]').forEach(inp => {
+                inp.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') e.preventDefault();
+                });
+            });
+
+            // Initialize pill states
+            toggleTypePills();
+
+            // Main: lookup on Student ID change/blur
+            const studentIdEl = document.getElementById('studentId');
+            const studentNameEl = document.getElementById('studentName');
+            const courseNameEl = document.getElementById('courseName');
+            const batchNoEl = document.getElementById('batchNo');
+
+            async function lookupByStudentId() {
+                const id = (studentIdEl.value || '').trim();
+                if (!id || id === lastLookupId) return;
+                lastLookupId = id;
+
+                // Clear dependent fields and dropdowns first
+                setFieldValue('studentName', '');
+                setFieldValue('courseName', '');
+                setFieldValue('batchNo', '');
+                clearSelectIfAny('field-courseName');
+                clearSelectIfAny('field-batchNo');
+
+                try {
+                    const rows = await fetchStudents();
+                    const matches = rows.filter(r => r.studentId.toLowerCase() === id.toLowerCase());
+
+                    // Validate ID
+                    if (matches.length === 0) {
+                        showMessage('Invalid Student ID. Please check and try again.', 'error');
+                        setFieldValue('studentName', '');
+                        setFieldValue('courseName', '');
+                        setFieldValue('batchNo', '');
+                        hideFeeSummary();
+                        // Mark field as error for UX
+                        document.getElementById('field-studentId').classList.add('has-error');
+                        return;
+                    } else {
+                        document.getElementById('field-studentId').classList.remove('has-error');
+                    }
+
+                    // Student Name: use first unique value
+                    const nameSet = Array.from(new Set(matches.map(m => m.studentName).filter(Boolean)));
+                    setFieldValue('studentName', nameSet[0] || '');
+
+                    // Course(s)
+                    const courses = Array.from(new Set(matches.map(m => m.courseName).filter(Boolean)));
+                    if (courses.length <= 1) {
+                        const only = courses[0] || '';
+                        setFieldValue('courseName', only);
+                        updateFeeSummaryForMatches(matches, only);
+                    } else {
+                        // Let user choose
+                        const sel = mountInlineSelect('field-courseName', courses, (val) => {
+                            setFieldValue('courseName', val);
+                            updateFeeSummaryForMatches(matches, val);
+                        });
+                        // If there is a most frequent course, preselect it; otherwise keep summary hidden until user picks
+                        hideFeeSummary();
+                    }
+
+                    // Batch(es) — if multiple for same ID, offer select
+                    const batches = Array.from(new Set(matches.map(m => m.batchNo).filter(Boolean)));
+                    if (batches.length <= 1) {
+                        setFieldValue('batchNo', batches[0] || '');
+                    } else {
+                        // Let user choose
+                        mountInlineSelect('field-batchNo', batches, (val) => {
+                            setFieldValue('batchNo', val);
+                        });
+                    }
+                } catch (err) {
+                    console.error('Lookup error:', err);
+                    showMessage('Could not fetch student data. Please try again.', 'error');
+                }
+            }
+
+            // Trigger lookup on blur and when pressing Enter
+            studentIdEl.addEventListener('blur', lookupByStudentId);
+            studentIdEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    lookupByStudentId();
+                }
+            });
+
+            // If user edits Student ID after a selection, allow re-lookup
+            studentIdEl.addEventListener('input', () => {
+                // Reset lastLookupId so blur triggers again with new value
+                lastLookupId = '';
+                // Clear dependent values if ID is being changed
+                setFieldValue('studentName', '');
+                setFieldValue('courseName', '');
+                setFieldValue('batchNo', '');
+                clearSelectIfAny('field-courseName');
+                clearSelectIfAny('field-batchNo');
+                hideFeeSummary();
+            });
+
+            // Update fee summary when course name is manually edited
+            courseNameEl.addEventListener('blur', async () => {
+                const id = (studentIdEl.value || '').trim();
+                if (!id) return;
+                try {
+                    const rows = await fetchStudents();
+                    const matches = rows.filter(r => (r.studentId || '').toLowerCase() === id.toLowerCase());
+                    if (matches.length) {
+                        const selectedCourse = (courseNameEl.value || '').trim();
+                        updateFeeSummaryForMatches(matches, selectedCourse);
+                    }
+                } catch {}
+            });
+
+            // Amount: allow numbers and dot; format lightly
+            const amountEl = document.getElementById('amount');
+            let amountTouched = false;
+            
+            amountEl.addEventListener('input', () => {
+                let v = amountEl.value.replace(/[^\d.]/g, '');
+                const parts = v.split('.');
+                if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+                amountEl.value = v;
+            });
+
+            // Auto-fill Amount with Due when user focuses Amount the first time
+            amountEl.addEventListener('focus', () => {
+                if (amountTouched) return;
+                const dueText = feeDueEl?.textContent || '';
+                const due = parseMoney(dueText);
+                if (due > 0 && !amountEl.value) {
+                    amountEl.value = due.toString();
+                }
+                amountTouched = true;
+            });
+
+            // Inline validation on submit
+            function validateForm() {
+                let ok = true;
+
+                // Type required
+                const typeSelected = paymentsCheckbox.checked || refundsCheckbox.checked;
+                document.getElementById('typeHelper').style.display = typeSelected ? 'none' : 'block';
+                ok = ok && typeSelected;
+
+                const required = [
+                    'field-studentId',
+                    'field-studentName',
+                    'field-courseName',
+                    'field-batchNo',
+                    'field-amount',
+                    'field-modeOfPayment',
+                    'field-paymentType',
+                    'field-txId',
+                    'field-dateOfPayment',
+                    'field-note'
+                ];
+
+                required.forEach(id => {
+                    const wrap = document.getElementById(id);
+                    if (!wrap) return;
+                    const input = wrap.querySelector('input, select, textarea');
+                    const value = (input?.value || '').trim();
+                    const hasError = !value;
+                    setError(id, hasError);
+                    ok = ok && !hasError;
+                });
+
+                // Amount numeric check
+                const amountVal = (amountEl.value || '').trim();
+                if (!/^\d+(\.\d{1,2})?$/.test(amountVal)) {
+                    setError('field-amount', true);
+                    ok = false;
+                }
+
+                // Final validation: require valid ID-derived fields
+                const idOk = (studentNameEl.value || '').trim().length > 0;
+                if (!idOk) {
+                    // If ID didn't resolve to a name, mark as error
+                    document.getElementById('field-studentId').classList.add('has-error');
+                }
+                ok = ok && idOk;
+
+                return ok;
+            }
+
+            // Submit
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!validateForm()) {
+                    showMessage('Please fix the highlighted fields.', 'error');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(form);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    if (key === 'type') {
+                        // skip; we set below from the pills
+                    } else {
+                        data[key] = value;
+                    }
+                }
+
+                data.type = paymentsCheckbox.checked ? paymentsCheckbox.value : refundsCheckbox.checked ? refundsCheckbox.value : '';
+
+                // Button state
+                const saveBtn = document.getElementById('saveButton');
+                const originalSaveText = saveBtn.textContent;
+                saveBtn.textContent = 'Saving...';
+                saveBtn.disabled = true;
+
+                try {
+                    await fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    showMessage('Data submitted successfully! Check your Google Sheet.', 'success');
+                    
+                    // Build the dynamic success card
+                    try {
+                        // 1) Fetch the latest wpPayments CSV and find the matching row we just posted
+                        const { rows: wpRows } = await fetchCSV(WPPAYMENTS_CSV_URL);
+
+                        const submitted = {
+                            type: data.type,
+                            studentId: data.studentId,
+                            studentName: data.studentName,
+                            amount: data.amount,
+                            modeOfPayment: data.modeOfPayment,
+                            paymentType: data.paymentType,
+                            txId: data.txId,
+                            courseName: data.courseName,
+                            batchNo: data.batchNo,
+                            dateOfPayment: data.dateOfPayment,
+                            note: data.note
+                        };
+
+                        const matched = findMatchingRow(wpRows, submitted);
+
+                        const receiptLink =
+                            (matched && (matched.receiptLink || matched['receiptLink'] || matched['Receipt Link'] || matched['receipt link'])) || '';
+
+                        // 2) Compute phone and due from metaData (students CSV)
+                        const { phone, due } = await computePhoneAndDue(submitted.studentId, submitted.courseName);
+
+                        // 3) Render the success card with WhatsApp link
+                        renderSuccessCard({ receiptLink, phone, due });
+
+                    } catch (e2) {
+                        console.warn('Could not build success card:', e2);
+                    }
+
+                    // Optionally hide the old messageBox once card is shown
+                    messageBox.classList.add('hidden');
+                    
+                    form.reset();
+                    paymentsCheckbox.checked = false;
+                    refundsCheckbox.checked = false;
+                    toggleTypePills();
+                } catch (error) {
+                    console.error('Error submitting data:', error);
+                    showMessage('Error submitting data. Please try again.', 'error');
+                } finally {
+                    saveBtn.textContent = originalSaveText;
+                    saveBtn.disabled = false;
+                    // Clear error states after successful reset
+                    document.querySelectorAll('.has-error').forEach(n => n.classList.remove('has-error'));
+                    document.getElementById('typeHelper').style.display = 'none';
+                }
+            });
+
+            // Clear
+            clearButton.addEventListener('click', () => {
+                form.reset();
+                paymentsCheckbox.checked = false;
+                refundsCheckbox.checked = false;
+                toggleTypePills();
+                document.querySelectorAll('.has-error').forEach(n => n.classList.remove('has-error'));
+                document.getElementById('typeHelper').style.display = 'none';
+                showMessage('Form cleared.', 'success');
+                
+                // Also clear the card on Clear button
+                document.getElementById('successCardMount').innerHTML = '';
+            });
+        });
+    </script>
+</body>
+</html>
