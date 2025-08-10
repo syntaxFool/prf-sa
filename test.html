@@ -269,61 +269,80 @@
             .fee-summary { margin: 0 16px 8px; }
         }
 
-        /* Success Card Styles */
-        .success-card {
-            margin: 16px 24px 24px;
-            border: 1px solid #e6e6ef;
-            border-radius: 14px;
-            background: #ffffff;
-            box-shadow: 0 8px 24px rgba(16,24,40,0.06);
+        /* Success popup */
+        .modal-overlay {
+            position: fixed; 
+            inset: 0;
+            background: rgba(17, 24, 39, 0.55);
+            display: none; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 30000;
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal-card {
+            width: min(92vw, 520px);
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
             overflow: hidden;
         }
-        .success-card-header {
-            background: #ecfdf5;
-            color: #065f46;
-            border-bottom: 1px solid #d1fae5;
-            padding: 12px 16px;
-            font-weight: 800;
-            font-size: 1rem;
-        }
-        .success-card-body {
-            padding: 14px 16px;
-            color: #111827;
-        }
-        .success-card-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            font-size: 0.95rem;
-            margin: 8px 0;
-        }
-        .success-card-actions {
-            display: flex;
+
+        .modal-head {
+            padding: 14px 18px;
+            background: #e8f1ff;
+            border-bottom: 1px solid #dbeafe;
+            display: flex; 
+            align-items: center; 
             gap: 10px;
+            color: #0b57d0; 
+            font-weight: 800;
+        }
+        .modal-body {
+            padding: 16px 18px 8px;
+        }
+        .modal-row {
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+        .modal-row .label {
+            color: #6b7280; 
+            font-weight: 600; 
+            margin-right: 8px;
+        }
+        .modal-success {
+            margin-top: 10px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .modal-actions {
+            display: flex; 
+            gap: 10px; 
             justify-content: flex-end;
-            padding: 12px 16px 16px;
-            border-top: 1px dashed #e5e7eb;
+            padding: 14px 18px 18px;
         }
         .btn-wa {
-            background: #25D366;
-            color: #fff;
-            border-radius: 999px;
-            padding: 10px 14px;
+            background: #25D366; 
+            color: white; 
             font-weight: 700;
+            border-radius: 999px; 
+            padding: 10px 14px;
         }
-        .btn-wa:hover { background: #1fb457; }
+        .btn-wa:hover { filter: brightness(0.95); }
         .btn-done {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #e5e7eb;
-            border-radius: 999px;
-            padding: 10px 14px;
+            background: #111827; 
+            color: white; 
             font-weight: 700;
+            border-radius: 999px; 
+            padding: 10px 16px;
         }
-        @media (max-width: 640px) {
-            .success-card { margin: 12px 16px 20px; }
-            .success-card-row { flex-direction: column; gap: 4px; }
-        }
+        .btn-done:hover { filter: brightness(1.05); }
     </style>
 </head>
 <body class="antialiased">
@@ -467,11 +486,43 @@
             </div>
         </form>
 
-        <!-- Message Box (errors/infos) -->
+        <!-- Message Box -->
         <div id="messageBox" class="hidden" role="alert"></div>
-        
-        <!-- Success Card mount point -->
-        <div id="successCardMount"></div>
+
+        <!-- Success Popup Modal -->
+        <div class="modal-overlay" id="successModal">
+            <div class="modal-card">
+                <div class="modal-head">
+                    <span>✅ Payment Submitted</span>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-row">
+                        <span class="label">Date & Time:</span>
+                        <span id="successDateTime">—</span>
+                    </div>
+                    <div class="modal-success" id="successMessageText">
+                        Data submitted successfully! Receipt is being generated.
+                    </div>
+                    <!-- Optional: show these details for the WhatsApp message preview -->
+                    <div class="modal-row">
+                        <span class="label">Student:</span>
+                        <span id="smStudent">—</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="label">Course:</span>
+                        <span id="smCourse">—</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="label">Amount:</span>
+                        <span id="smAmount">—</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-wa" id="btnShareWA">Share Receipt via WhatsApp</button>
+                    <button type="button" class="btn-done" id="btnDone">Done</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -484,38 +535,37 @@
             const pillPayments = document.getElementById('pillPayments');
             const pillRefunds = document.getElementById('pillRefunds');
 
+            // Success modal elements
+            const successModal = document.getElementById('successModal');
+            const successDateTime = document.getElementById('successDateTime');
+            const smStudent = document.getElementById('smStudent');
+            const smCourse = document.getElementById('smCourse');
+            const smAmount = document.getElementById('smAmount');
+            const btnShareWA = document.getElementById('btnShareWA');
+            const btnDone = document.getElementById('btnDone');
+
+            // Runtime cache for WA message
+            let lastSubmission = {
+                studentId: '',
+                studentName: '',
+                courseName: '',
+                amount: '',
+                receiptLink: '' // stays empty unless you enable CORS and return it from backend
+            };
+
             // IMPORTANT: This has been updated with your deployed Google Apps Script Web App URL
             const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzjQ9vYDF9n-qbbjVn0FcBY7UjY-Rs0mHXRfqRGNaTBPzCSoevnnr77Cba_yLim8rCr/exec';
 
             // Live validation constants and cache
             const STUDENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=1820019961&single=true&output=csv';
 
-            // Success card constants
-            const WPPAYMENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=384282536&single=true&output=csv';
+            // CSV URLs for WhatsApp sharing
+            const META_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=1820019961&single=true&output=csv';
+            const PAYMENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=384282536&single=true&output=csv';
 
             // In-memory cache
             let studentRows = []; // array of row objects
             let lastLookupId = ''; // last looked up ID to avoid duplicate work
-
-            // Reusable CSV line splitter (handles basic quotes and commas)
-            function splitCSVLine(line) {
-                const out = [];
-                let cur = '';
-                let inQ = false;
-                for (let i = 0; i < line.length; i++) {
-                    const ch = line[i];
-                    if (ch === '"') {
-                        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
-                        else inQ = !inQ;
-                    } else if (ch === ',' && !inQ) {
-                        out.push(cur); cur = '';
-                    } else {
-                        cur += ch;
-                    }
-                }
-                out.push(cur);
-                return out.map(s => s.trim());
-            }
 
             // CSV fetch + parse helper (simple, robust)
             async function fetchStudents() {
@@ -569,148 +619,55 @@
                 return studentRows;
             }
 
-            // CSV fetcher by header (reuse your splitCSVLine)
+            // CSV fetch helpers for WhatsApp sharing
             async function fetchCSV(url) {
-                const res = await fetch(url, { cache: 'no-store' });
-                const text = await res.text();
-                const lines = text.split(/\r?\n/).filter(Boolean);
-                const headerLine = lines.shift() || '';
-                const headerCells = splitCSVLine(headerLine);
-                const rows = lines.map(line => {
-                    const cells = splitCSVLine(line);
-                    const obj = {};
-                    headerCells.forEach((h, i) => { obj[h] = (cells[i] || '').trim(); });
-                    return obj;
-                });
-                return { header: headerCells, rows };
-            }
-
-            // Utility to find the last appended row by referenceId
-            function normalizeMoneyStr(v) { 
-                return (v || '').toString().replace(/[,₹\s]/g, ''); 
-            }
-
-            function findMatchingRow(rows, data) {
-                // Try to match on these keys present in sheet headers:
-                // "type","studentId","amount","txId","courseName","batchNo","dateOfPayment","studentName"
-                const sig = {
-                    type: (data.type || '').trim(),
-                    studentId: (data.studentId || '').trim(),
-                    studentName: (data.studentName || '').trim(),
-                    txId: (data.txId || '').trim(),
-                    courseName: (data.courseName || '').trim(),
-                    batchNo: (data.batchNo || '').trim(),
-                    dateOfPayment: (data.dateOfPayment || '').trim(),
-                    amount: normalizeMoneyStr(data.amount || '')
-                };
-                // Filter candidates
-                const candidates = rows.filter(r => {
-                    const rAmount = normalizeMoneyStr(r.amount || r.Amount || r['Amount'] || '');
-                    return (
-                        ((r.type || r.Type || '') === sig.type) &&
-                        ((r.studentId || r['Student ID'] || r.StudentId || '') === sig.studentId) &&
-                        ((r.txId || r['txId'] || r['Tx ID'] || '') === sig.txId) &&
-                        ((r.courseName || r['Course Name'] || '') === sig.courseName) &&
-                        ((r.batchNo || r['Batch No.'] || r['Batch No'] || '') === sig.batchNo) &&
-                        ((r.dateOfPayment || r['Date Of Payment'] || '') === sig.dateOfPayment) &&
-                        (rAmount === sig.amount)
-                    );
-                });
-                // Pick the last occurrence (most recent append)
-                return candidates.length ? candidates[candidates.length - 1] : null;
-            }
-
-            // Get phone and due from metaData (students CSV you're already using)
-            function extractPhoneFromMeta(row) {
-                return row['Phone'] || row['phone'] || row['Mobile'] || row['mobile'] || row['Contact'] || '';
-            }
-            
-            function parseNum(v) {
-                if (v == null) return 0;
-                const s = String(v).replace(/[,₹\s]/g, '');
-                const n = parseFloat(s);
-                return isNaN(n) ? 0 : n;
-            }
-
-            async function computePhoneAndDue(studentId, courseName) {
-                // Reuse the same CSV already used for student lookup: STUDENTS_CSV_URL
-                const { rows } = await fetchCSV(STUDENTS_CSV_URL);
-                // Match by Student ID (case-insensitive). If multiple rows, pick those with same courseName if provided.
-                const matches = rows.filter(r => (r['Student ID'] || r.studentId || '').toString().toLowerCase() === (studentId || '').toString().toLowerCase());
-                if (!matches.length) return { phone: '', due: 0 };
-                let courseMatches = matches;
-                if (courseName) {
-                    courseMatches = matches.filter(r => (r['Course Name'] || r.courseName || '').toLowerCase() === courseName.toLowerCase()) || matches;
-                }
-                // Phone: first non-empty
-                const phone = extractPhoneFromMeta(courseMatches.find(r => extractPhoneFromMeta(r)) || {}) || extractPhoneFromMeta(matches) || '';
-                // Fees (L) and Paid (M). Try headers; fallback to common names
-                // We previously mapped fallback L=Fees, M=Paid; here try by header label:
-                const totalFees = courseMatches.reduce((sum, r) => sum + parseNum(r['Fees Amount'] || r['Fees'] || r['fees'] || r['L'] || r['feesAmount'] || r['Fee'] || r['fee']), 0);
-                const totalPaid = courseMatches.reduce((sum, r) => sum + parseNum(r['Paid Amount'] || r['Paid'] || r['paid'] || r['M'] || r['paidAmount']), 0);
-                const due = Math.max(totalFees - totalPaid, 0);
-                return { phone, due };
-            }
-
-            // Render success card and WhatsApp link
-            function renderSuccessCard({ receiptLink, phone, due }) {
-                const mount = document.getElementById('successCardMount');
-                if (!mount) return;
-                
-                const dt = new Date();
-                const dateTimeStr = dt.toLocaleString('en-IN', { hour12: true });
-
-                const text = `Great news! Your payment receipt is ready—check out the attached link! ${receiptLink} Current status: Balance Due — ₹${due}. Don't worry, you're just a click away from wrapping this up.`;
-
-                // Normalize phone: expect something like "91XXXXXXXXXX". If phone already includes country code, use as-is; else prefix 91.
-                let phoneStr = (phone || '').replace(/\D/g, '');
-                if (phoneStr && !phoneStr.startsWith('91')) phoneStr = '91' + phoneStr;
-
-                const waHref = phoneStr
-                    ? `https://wa.me/${phoneStr}?text=${encodeURIComponent(text)}`
-                    : '';
-
-                mount.innerHTML = `
-                    <div class="success-card">
-                        <div class="success-card-header">Payment Recorded Successfully</div>
-                        <div class="success-card-body">
-                            <div class="success-card-row">
-                                <div>Date & Time</div>
-                                <div><strong>${dateTimeStr}</strong></div>
-                            </div>
-                            <div class="success-card-row" style="align-items:flex-start;">
-                                <div>Message</div>
-                                <div><strong>Data submitted successfully! Receipt is ready.</strong></div>
-                            </div>
-                        </div>
-                        <div class="success-card-actions">
-                            <a id="btnWaShare" class="btn btn-wa" target="_blank" rel="noopener">
-                                Share Receipt via WhatsApp
-                            </a>
-                            <button id="btnDone" type="button" class="btn btn-done">Done</button>
-                        </div>
-                    </div>
-                `;
-
-                const waBtn = document.getElementById('btnWaShare');
-                if (waBtn) {
-                    if (waHref) {
-                        waBtn.setAttribute('href', waHref);
-                    } else {
-                        waBtn.setAttribute('href', '#');
-                        waBtn.setAttribute('disabled', 'true');
-                        waBtn.style.opacity = '.6';
-                        waBtn.textContent = 'WhatsApp not available';
+                for (let i = 0; i < 2; i++) {
+                    try {
+                        const res = await fetch(url, { cache: 'no-store' });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return await res.text();
+                    } catch (e) {
+                        if (i === 1) throw e;
+                        await new Promise(r => setTimeout(r, 400));
                     }
                 }
-                
-                const doneBtn = document.getElementById('btnDone');
-                if (doneBtn) {
-                    doneBtn.addEventListener('click', () => {
-                        mount.innerHTML = '';
-                    });
-                }
             }
+
+            function parseCSVWithHeader(text) {
+                const lines = text.split(/\r?\n/).filter(Boolean);
+                if (!lines.length) return { header: [], rows: [] };
+                const header = splitCSVLine(lines.shift());
+                const rows = lines.map(line => splitCSVLine(line));
+                return { header, rows };
+            }
+
+            // Helper function to split CSV lines (moved outside fetchStudents for reuse)
+            function splitCSVLine(line) {
+                // Light parser: split by comma, handle basic quoted fields
+                const out = [];
+                let cur = '';
+                let inQ = false;
+                for (let i = 0; i < line.length; i++) {
+                    const ch = line[i];
+                    if (ch === '"') {
+                        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+                        else inQ = !inQ;
+                    } else if (ch === ',' && !inQ) {
+                        out.push(cur); cur = '';
+                    } else {
+                        cur += ch;
+                    }
+                }
+                out.push(cur);
+                return out.map(s => s.trim());
+            }
+
+
+
+
+
+
+
 
             // Helpers
             function showMessage(message, type = 'success') {
@@ -791,6 +748,28 @@
                 if (feeSummaryEl) feeSummaryEl.style.display = '';
             }
 
+            // Success modal helpers
+            function openSuccessModal(msg, submission) {
+                const now = new Date();
+                const dt = now.toLocaleString('en-IN', { hour12: true });
+                successDateTime.textContent = dt;
+
+                document.getElementById('successMessageText').textContent = msg || 'Success';
+
+                // Fill preview fields
+                smStudent.textContent = submission.studentId && submission.studentName
+                    ? `${submission.studentId} — ${submission.studentName}`
+                    : (submission.studentId || submission.studentName || '—');
+                smCourse.textContent = submission.courseName || '—';
+                smAmount.textContent = submission.amount ? `₹${submission.amount}` : '—';
+
+                successModal.classList.add('show');
+            }
+
+            function closeSuccessModal() {
+                successModal.classList.remove('show');
+            }
+
             function updateFeeSummaryForMatches(matches, selectedCourse) {
                 if (!matches || matches.length === 0) {
                     hideFeeSummary();
@@ -828,6 +807,14 @@
                 } else if (refundsCheckbox.checked) {
                     pillRefunds.classList.add('active');
                 }
+                
+                // Debug logging
+                console.log('Pills updated:', {
+                    payments: paymentsCheckbox.checked,
+                    refunds: refundsCheckbox.checked,
+                    pillPaymentsActive: pillPayments.classList.contains('active'),
+                    pillRefundsActive: pillRefunds.classList.contains('active')
+                });
             }
 
             // Radio change handlers (mutual exclusivity handled by radio itself)
@@ -855,6 +842,115 @@
 
             // Initialize pill states
             toggleTypePills();
+
+            // Success modal event listeners
+            btnShareWA.addEventListener('click', async () => {
+                try {
+                    // Ensure required fields exist
+                    const sid = (lastSubmission.studentId || '').trim();
+                    const course = (lastSubmission.courseName || '').trim();
+                    if (!sid) {
+                        showMessage('Student ID missing for WhatsApp share.', 'error');
+                        return;
+                    }
+
+                    // Fetch meta CSV (with retry)
+                    const metaText = await fetchCSV(META_CSV_URL);
+                    const meta = parseCSVWithHeader(metaText);
+
+                    // Find columns (fallback indexes if headers not found)
+                    const mh = meta.header.map(h => h.trim());
+                    const idx = {
+                        studentId: mh.findIndex(h => /student\s*id/i.test(h)),
+                        courseName: mh.findIndex(h => /course\s*name/i.test(h)),
+                        phone: mh.findIndex(h => /phone|mobile|contact/i.test(h)),   // E
+                        fees: mh.findIndex(h => /fees|fee\s*amount/i.test(h)),       // L
+                        paid: mh.findIndex(h => /paid/i.test(h)),                    // M
+                    };
+                    const fb = { studentId: 1, courseName: 9, phone: 4, fees: 11, paid: 12 };
+
+                    const idCol = idx.studentId >= 0 ? idx.studentId : fb.studentId;
+                    const courseCol = idx.courseName >= 0 ? idx.courseName : fb.courseName;
+                    const phoneCol = idx.phone >= 0 ? idx.phone : fb.phone;
+                    const feesCol = idx.fees >= 0 ? idx.fees : fb.fees;
+                    const paidCol = idx.paid >= 0 ? idx.paid : fb.paid;
+
+                    const match = meta.rows.find(r =>
+                        (r[idCol] || '').toLowerCase() === sid.toLowerCase() &&
+                        (!course || (r[courseCol] || '').toLowerCase() === course.toLowerCase())
+                    );
+                    if (!match) {
+                        showMessage('Could not find student details for WhatsApp share.', 'error');
+                        return;
+                    }
+
+                    // Phone normalize
+                    let phone = String(match[phoneCol] || '').replace(/\D/g, '');
+                    if (phone.startsWith('0')) phone = phone.slice(1);
+                    if (!phone.startsWith('91')) phone = '91' + phone;
+                    if (phone.length < 12) {
+                        showMessage('Invalid phone number for WhatsApp share.', 'error');
+                        return;
+                    }
+
+                    // Fees/Paid/Due
+                    const fees = String(match[feesCol] || '');
+                    const paid = String(match[paidCol] || '');
+                    const toNum = v => {
+                        if (typeof v !== 'string') v = String(v ?? '');
+                        v = v.replace(/[,₹\s]/g, '');
+                        const n = parseFloat(v);
+                        return isNaN(n) ? 0 : n;
+                    };
+                    const due = Math.max(toNum(fees) - toNum(paid), 0);
+
+                    // Payments CSV for receipt link
+                    const payText = await fetchCSV(PAYMENTS_CSV_URL);
+                    const pay = parseCSVWithHeader(payText);
+                    const ph = pay.header.map(h => h.trim());
+                    const pidx = {
+                        type: ph.findIndex(h => /^type$/i.test(h)),
+                        studentId: ph.findIndex(h => /^student\s*id$/i.test(h)),
+                        courseName: ph.findIndex(h => /^course\s*name$/i.test(h)),
+                        receiptLink: ph.findIndex(h => /^receipt\s*link$/i.test(h)), // M
+                    };
+                    const pfb = { type: 1, studentId: 2, courseName: 8, receiptLink: 12 };
+                    const typeCol = pidx.type >= 0 ? pidx.type : pfb.type;
+                    const sidCol = pidx.studentId >= 0 ? pidx.studentId : pfb.studentId;
+                    const pcourseCol = pidx.courseName >= 0 ? pidx.courseName : pfb.courseName;
+                    const linkCol = pidx.receiptLink >= 0 ? pidx.receiptLink : pfb.receiptLink;
+
+                    const filtered = pay.rows.filter(r =>
+                        (r[typeCol] || '').toLowerCase() === 'payments' &&
+                        (r[sidCol] || '').toLowerCase() === sid.toLowerCase() &&
+                        (!course || (r[pcourseCol] || '').toLowerCase() === course.toLowerCase())
+                    );
+                    const receiptLink = filtered.length ? (filtered[filtered.length - 1][linkCol] || '') : '';
+
+                    // Compose message and redirect to wa.me
+                    const msg = [
+                        "Great news! Your payment receipt is ready—check out the attached link!",
+                        receiptLink ? receiptLink : '',
+                        `Current status: Balance Due — '${due}'.`,
+                        "Don't worry, you're just a click away from wrapping this up."
+                    ].filter(Boolean).join('\n\n');
+
+                    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+
+                    // Top-level navigation (avoid iframe)
+                    window.location.href = waUrl;
+                } catch (e) {
+                    console.error('WA share error', e);
+                    showMessage('Unable to prepare WhatsApp message. Please try again.', 'error');
+                }
+            });
+
+            btnDone.addEventListener('click', () => closeSuccessModal());
+
+            // Also close on overlay click (optional)
+            successModal.addEventListener('click', (e) => {
+                if (e.target === successModal) closeSuccessModal();
+            });
 
             // Main: lookup on Student ID change/blur
             const studentIdEl = document.getElementById('studentId');
@@ -1074,45 +1170,19 @@
                         body: JSON.stringify(data),
                     });
 
-                    showMessage('Data submitted successfully! Check your Google Sheet.', 'success');
-                    
-                    // Build the dynamic success card
-                    try {
-                        // 1) Fetch the latest wpPayments CSV and find the matching row we just posted
-                        const { rows: wpRows } = await fetchCSV(WPPAYMENTS_CSV_URL);
+                    // Assume success (no-cors)
+                    lastSubmission = {
+                        studentId: data.studentId,
+                        studentName: data.studentName,
+                        courseName: data.courseName,
+                        amount: data.amount,
+                        receiptLink: '' // fill later if backend returns it
+                    };
 
-                        const submitted = {
-                            type: data.type,
-                            studentId: data.studentId,
-                            studentName: data.studentName,
-                            amount: data.amount,
-                            modeOfPayment: data.modeOfPayment,
-                            paymentType: data.paymentType,
-                            txId: data.txId,
-                            courseName: data.courseName,
-                            batchNo: data.batchNo,
-                            dateOfPayment: data.dateOfPayment,
-                            note: data.note
-                        };
+                    // Open modal
+                    openSuccessModal('Data submitted successfully! Receipt will be available shortly.', lastSubmission);
 
-                        const matched = findMatchingRow(wpRows, submitted);
-
-                        const receiptLink =
-                            (matched && (matched.receiptLink || matched['receiptLink'] || matched['Receipt Link'] || matched['receipt link'])) || '';
-
-                        // 2) Compute phone and due from metaData (students CSV)
-                        const { phone, due } = await computePhoneAndDue(submitted.studentId, submitted.courseName);
-
-                        // 3) Render the success card with WhatsApp link
-                        renderSuccessCard({ receiptLink, phone, due });
-
-                    } catch (e2) {
-                        console.warn('Could not build success card:', e2);
-                    }
-
-                    // Optionally hide the old messageBox once card is shown
-                    messageBox.classList.add('hidden');
-                    
+                    // Clear form after showing modal
                     form.reset();
                     paymentsCheckbox.checked = false;
                     refundsCheckbox.checked = false;
@@ -1126,6 +1196,10 @@
                     // Clear error states after successful reset
                     document.querySelectorAll('.has-error').forEach(n => n.classList.remove('has-error'));
                     document.getElementById('typeHelper').style.display = 'none';
+                    hideFeeSummary();
+                    clearSelectIfAny('field-courseName');
+                    clearSelectIfAny('field-batchNo');
+                    amountTouched = false;
                 }
             });
 
@@ -1138,9 +1212,6 @@
                 document.querySelectorAll('.has-error').forEach(n => n.classList.remove('has-error'));
                 document.getElementById('typeHelper').style.display = 'none';
                 showMessage('Form cleared.', 'success');
-                
-                // Also clear the card on Clear button
-                document.getElementById('successCardMount').innerHTML = '';
             });
         });
     </script>
