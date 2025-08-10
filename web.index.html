@@ -2,11 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>New Transaction</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --fs-body: clamp(14px, 1.9vw, 16px);
+            --fs-title: clamp(18px, 2.8vw, 22px);
+            --fs-label: clamp(13px, 2.3vw, 14px);
+            --space-1: clamp(6px, 1.2vw, 10px);
+            --space-2: clamp(10px, 2vw, 16px);
+            --space-3: clamp(14px, 3vw, 24px);
+            --space-4: clamp(16px, 4vw, 32px);
+            --space-6: clamp(20px, 5vw, 40px);
+            --space-8: clamp(24px, 6vw, 48px);
+        }
+        
         body {
             font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
             background: #f7f7fb;
@@ -14,44 +26,59 @@
             display: flex;
             align-items: flex-start;
             justify-content: center;
-            padding: 24px;
+            padding: var(--space-3);
+            font-size: var(--fs-body);
+            line-height: 1.5;
+            /* Ensure body can scroll on all devices */
+            overflow-x: hidden;
         }
+        
         .form-container {
-            max-width: 760px;
             width: 100%;
+            max-width: clamp(340px, 92vw, 920px);
             border: 1px solid #e6e6ef;
-            border-radius: 16px;
+            border-radius: clamp(12px, 3vw, 16px);
             background: #fff;
             box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
         }
+        
         .header-bg {
             background: linear-gradient(180deg, #4285F4 0%, #3b78e7 100%);
             color: #fff;
-            border-radius: 16px 16px 0 0;
+            border-radius: clamp(12px, 3vw, 16px) clamp(12px, 3vw, 16px) 0 0;
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
         }
+        
         /* Fields */
         .field-label {
             display: block;
             color: #111827;
             font-weight: 700;
-            font-size: 0.9rem;
-            margin-bottom: 6px;
+            font-size: var(--fs-label);
+            margin-bottom: var(--space-1);
         }
+        
         .required-label::after {
             content: '*';
             color: #ea4335;
             margin-left: 4px;
         }
+        
         input[type="text"],
         input[type="date"],
         select {
             width: 100%;
             border: 1px solid #e5e7eb;
             border-radius: 10px;
-            padding: 12px 14px;
+            padding: clamp(10px, 2.2vw, 12px) clamp(12px, 3vw, 14px);
             transition: box-shadow .2s, border-color .2s, background-color .2s;
             background: #fff;
+            font-size: 1rem;
+            line-height: 1.4;
+            min-height: 44px;
         }
+        
         input[type="text"]:focus,
         input[type="date"]:focus,
         select:focus {
@@ -59,20 +86,22 @@
             border-color: #4285F4;
             box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.18);
         }
+        
         /* Toggle pills for Type */
         .type-toggle {
             display: inline-flex;
-            gap: 8px;
+            gap: clamp(6px, 1.5vw, 8px);
             background: #f3f4f6;
             border-radius: 999px;
-            padding: 6px;
+            padding: clamp(4px, 1.5vw, 6px);
             border: 1px solid #e5e7eb;
         }
+        
         .pill {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
+            gap: clamp(6px, 1.5vw, 8px);
+            padding: clamp(8px, 2.2vw, 12px) clamp(12px, 3vw, 16px);
             border-radius: 999px;
             font-weight: 600;
             color: #374151;
@@ -82,20 +111,25 @@
             transition: all .2s ease;
             user-select: none;
             position: relative;
+            min-height: 44px;
         }
+        
         .pill:hover {
             background: #f9fafb;
             border-color: #d1d5db;
         }
+        
         .pill.active {
             background: #e8f1ff !important;
             color: #0b57d0 !important;
             border-color: #93c5fd !important;
             box-shadow: 0 0 0 3px rgba(66,133,244,0.18);
         }
+        
         .pill input {
             display: none;
         }
+        
         /* Input groups (prefix) */
         .input-group {
             display: flex;
@@ -104,119 +138,124 @@
             border-radius: 10px;
             overflow: hidden;
             background: #fff;
+            min-height: 44px;
         }
+        
         .input-prefix {
             background: #f9fafb;
             color: #6b7280;
             font-weight: 600;
-            padding: 10px 12px;
+            padding: clamp(8px, 2.2vw, 10px) clamp(10px, 2.5vw, 12px);
             border-right: 1px solid #e5e7eb;
             white-space: nowrap;
         }
+        
         .input-group input {
             border: none;
             outline: none;
-            padding: 12px 14px;
+            padding: clamp(10px, 2.2vw, 12px) clamp(12px, 3vw, 14px);
             width: 100%;
         }
+        
         .input-group:focus-within {
             border-color: #4285F4;
             box-shadow: 0 0 0 3px rgba(66,133,244,0.18);
         }
+        
         /* Section spacing */
         .section {
-            padding: 0 24px 24px;
+            padding: 0 var(--space-3) var(--space-3);
         }
+        
         .section + .section {
             border-top: 1px dashed #e5e7eb;
-            padding-top: 24px;
+            padding-top: var(--space-3);
         }
+        
         /* Buttons */
         .btn {
-            padding: 12px 18px;
+            padding: clamp(10px, 2.2vw, 12px) clamp(14px, 3vw, 18px);
             border-radius: 999px;
             font-weight: 600;
             transition: transform .15s ease, box-shadow .15s ease, background .2s, color .2s;
             box-shadow: 0 2px 3px rgba(0,0,0,0.08);
+            min-height: 44px;
+            min-width: clamp(120px, 30vw, 180px);
         }
+        
         .btn:disabled {
             opacity: .7;
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
         }
+        
         .btn-clear {
             background: #f3f4f6;
             color: #374151;
             border: 1px solid #e5e7eb;
         }
+        
         .btn-clear:hover {
             background: #e5e7eb;
         }
+        
         .btn-save {
             background: #4285F4;
             color: #fff;
         }
+        
         .btn-save:hover {
             background: #3b78e7;
         }
+        
         /* Message box */
         #messageBox {
-            margin: 16px 24px 24px;
-            padding: 12px 14px;
+            margin: var(--space-2) var(--space-3) var(--space-3);
+            padding: clamp(10px, 2.2vw, 12px) clamp(12px, 3vw, 14px);
             border-radius: 12px;
             text-align: center;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: clamp(0.9rem, 2.3vw, 0.95rem);
         }
+        
         #messageBox.bg-green-100 {
             border: 1px solid #86efac;
         }
+        
         #messageBox.bg-red-100 {
             border: 1px solid #fca5a5;
         }
+        
         /* Helper text for errors */
         .helper {
-            margin-top: 6px;
-            font-size: 0.82rem;
+            margin-top: var(--space-1);
+            font-size: clamp(0.75rem, 2vw, 0.82rem);
             color: #dc2626;
             display: none;
         }
+        
         .has-error input,
         .has-error select,
         .has-error .input-group {
             border-color: #ef4444 !important;
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
         }
+        
         .has-error .helper {
             display: block;
         }
-        @media (max-width: 640px) {
-            body {
-                padding: 16px;
-            }
-            .section {
-                padding: 0 16px 20px;
-            }
-            #messageBox {
-                margin: 12px 16px 20px;
-            }
-            .type-toggle {
-                gap: 6px;
-            }
-            .pill {
-                padding: 8px 12px;
-            }
-        }
-
+        
         /* Inline select styling when multiple matches are found */
         .inline-select {
             width: 100%;
             border: 1px solid #e5e7eb;
             border-radius: 10px;
-            padding: 10px 12px;
+            padding: clamp(8px, 2.2vw, 10px) clamp(10px, 2.5vw, 12px);
             background: #fff;
+            min-height: 44px;
         }
+        
         .inline-select:focus {
             outline: none;
             border-color: #4285F4;
@@ -224,49 +263,223 @@
         }
 
         .fee-summary {
-            margin: 0 24px 8px;
+            margin: 0 var(--space-3) var(--space-1);
             border: 1px solid #e6e6ef;
             border-radius: 12px;
             background: #fff;
             overflow: hidden;
         }
+        
         .fee-summary-header {
             background: #f9fafb;
-            padding: 10px 12px;
+            padding: clamp(8px, 2.2vw, 10px) clamp(10px, 2.5vw, 12px);
             font-weight: 700;
             color: #111827;
             border-bottom: 1px solid #e6e6ef;
         }
+        
         .fee-summary-table {
             width: 100%;
             border-collapse: collapse;
         }
+        
         .fee-summary-table th,
         .fee-summary-table td {
-            padding: 10px 12px;
+            padding: clamp(8px, 2.2vw, 10px) clamp(10px, 2.5vw, 12px);
             text-align: left;
             border-bottom: 1px solid #f1f5f9;
         }
+        
         .fee-summary-table th {
-            font-size: 0.88rem;
+            font-size: clamp(0.8rem, 2.2vw, 0.88rem);
             color: #6b7280;
             font-weight: 700;
         }
+        
         .fee-summary-table td {
-            font-size: 0.95rem;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
             color: #111827;
             font-weight: 700;
         }
+        
         .fee-muted {
             color: #6b7280;
             font-weight: 600;
         }
+        
         .fee-due {
             color: #b45309;
             font-weight: 800;
         }
-        @media (max-width: 640px) {
-            .fee-summary { margin: 0 16px 8px; }
+
+        /* Success popup */
+        .modal-overlay {
+            position: fixed; 
+            inset: 0;
+            background: rgba(17, 24, 39, 0.55);
+            display: none; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 30000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .modal-overlay.show { display: flex; }
+
+        .modal-card {
+            width: min(92vw, 520px);
+            background: #fff;
+            border-radius: clamp(12px, 3vw, 16px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+
+        .modal-head {
+            padding: clamp(12px, 2.5vw, 14px) clamp(16px, 3vw, 18px);
+            background: #e8f1ff;
+            border-bottom: 1px solid #dbeafe;
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            color: #0b57d0; 
+            font-weight: 800;
+        }
+        
+        .modal-body {
+            padding: clamp(14px, 3vw, 16px) clamp(16px, 3vw, 18px) clamp(6px, 2vw, 8px);
+        }
+        
+        .modal-row {
+            margin-bottom: clamp(6px, 2vw, 8px);
+            color: #374151;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+        }
+        
+        .modal-row .label {
+            color: #6b7280; 
+            font-weight: 600; 
+            margin-right: 8px;
+        }
+        
+        .modal-success {
+            margin-top: clamp(8px, 2.5vw, 10px);
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: clamp(8px, 2.2vw, 10px) clamp(10px, 2.5vw, 12px);
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        
+        .modal-actions {
+            display: flex; 
+            gap: clamp(8px, 2.5vw, 10px); 
+            justify-content: flex-end;
+            padding: clamp(12px, 2.5vw, 14px) clamp(16px, 3vw, 18px) clamp(16px, 3vw, 18px);
+        }
+        
+        .btn-wa {
+            background: #25D366; 
+            color: white; 
+            font-weight: 700;
+            border-radius: 999px; 
+            padding: clamp(8px, 2.2vw, 10px) clamp(12px, 3vw, 14px);
+            min-height: 44px;
+        }
+        
+        .btn-wa:hover { filter: brightness(0.95); }
+        
+        .btn-done {
+            background: #111827; 
+            color: white; 
+            font-weight: 700;
+            border-radius: 999px; 
+            padding: clamp(8px, 2.2vw, 10px) clamp(14px, 3vw, 16px);
+            min-height: 44px;
+        }
+        
+        .btn-done:hover { filter: brightness(1.05); }
+        
+        /* Responsive breakpoints - mobile-first approach */
+        @media (min-width: 480px) {
+            .form-container { 
+                border-radius: clamp(14px, 3.5vw, 18px); 
+            }
+        }
+        
+        @media (min-width: 640px) {
+            .section { 
+                padding: 0 clamp(16px, 3vw, 24px) clamp(16px, 3vw, 24px); 
+            }
+            #messageBox {
+                margin: clamp(12px, 3vw, 16px) clamp(16px, 3vw, 24px) clamp(16px, 3vw, 24px);
+            }
+            .fee-summary {
+                margin: 0 clamp(16px, 3vw, 24px) clamp(6px, 2vw, 8px);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            /* Switch to two columns comfortably */
+            .section.grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            }
+            .form-container { 
+                max-width: 820px; 
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .form-container { 
+                max-width: 920px; 
+            }
+        }
+        
+        /* Mobile-specific adjustments */
+        @media (max-width: 639px) {
+            body {
+                padding: var(--space-2);
+            }
+            
+            .section {
+                padding: 0 var(--space-2) var(--space-2);
+            }
+            
+            .type-toggle {
+                gap: clamp(4px, 1.2vw, 6px);
+            }
+            
+            .pill {
+                padding: clamp(6px, 2vw, 8px) clamp(10px, 2.5vw, 12px);
+            }
+            
+            /* Ensure touch targets are properly sized on small screens */
+            button, .pill, .inline-select, .input-group input {
+                min-height: 44px;
+            }
+            
+            /* Bottom-aligned primary actions for thumb reach */
+            .section:last-child {
+                padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+            }
+        }
+        
+        /* Input improvements for mobile */
+        input::placeholder { 
+            color: #9ca3af; 
+        }
+        
+        /* Ensure proper input modes for mobile keyboards */
+        #amount { 
+            inputmode: decimal; 
+        }
+        
+        #studentId { 
+            inputmode: latin; 
+        }
+        
+        #txId { 
+            autocomplete: off; 
         }
     </style>
 </head>
@@ -274,7 +487,7 @@
     <div class="container mx-auto p-8 form-container">
         <!-- Header Section -->
         <div class="header-bg p-6 mb-10 text-center">
-            <h1 class="text-3xl font-bold tracking-normal">New Transaction</h1>
+            <h1 class="font-bold tracking-normal" style="font-size: var(--fs-title);">New Transaction</h1>
         </div>
 
         <!-- Form Section -->
@@ -413,9 +626,44 @@
 
         <!-- Message Box -->
         <div id="messageBox" class="hidden" role="alert"></div>
+
+        <!-- Success Popup Modal -->
+        <div class="modal-overlay" id="successModal">
+            <div class="modal-card">
+                <div class="modal-head">
+                    <span>✅ Payment Submitted</span>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-row">
+                        <span class="label">Date & Time:</span>
+                        <span id="successDateTime">—</span>
+                    </div>
+                    <div class="modal-success" id="successMessageText">
+                        Data submitted successfully! Receipt is being generated.
+                    </div>
+                    <!-- Optional: show these details for the WhatsApp message preview -->
+                    <div class="modal-row">
+                        <span class="label">Student:</span>
+                        <span id="smStudent">—</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="label">Course:</span>
+                        <span id="smCourse">—</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="label">Amount:</span>
+                        <span id="smAmount">—</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-wa" id="btnShareWA">Share Receipt via WhatsApp</button>
+                    <button type="button" class="btn-done" id="btnDone">Done</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
+    <script defer>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('transactionForm');
             const clearButton = document.getElementById('clearButton');
@@ -425,11 +673,33 @@
             const pillPayments = document.getElementById('pillPayments');
             const pillRefunds = document.getElementById('pillRefunds');
 
+            // Success modal elements
+            const successModal = document.getElementById('successModal');
+            const successDateTime = document.getElementById('successDateTime');
+            const smStudent = document.getElementById('smStudent');
+            const smCourse = document.getElementById('smCourse');
+            const smAmount = document.getElementById('smAmount');
+            const btnShareWA = document.getElementById('btnShareWA');
+            const btnDone = document.getElementById('btnDone');
+
+            // Runtime cache for WA message
+            let lastSubmission = {
+                studentId: '',
+                studentName: '',
+                courseName: '',
+                amount: '',
+                receiptLink: '' // stays empty unless you enable CORS and return it from backend
+            };
+
             // IMPORTANT: This has been updated with your deployed Google Apps Script Web App URL
             const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzjQ9vYDF9n-qbbjVn0FcBY7UjY-Rs0mHXRfqRGNaTBPzCSoevnnr77Cba_yLim8rCr/exec';
 
             // Live validation constants and cache
             const STUDENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=1820019961&single=true&output=csv';
+
+            // CSV URLs for WhatsApp sharing
+            const META_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=1820019961&single=true&output=csv';
+            const PAYMENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3SM8IaQNp4VBBXaXmu8QuLRsJP8-wOTXKP5UM3S_BCOgp4_6IA27laZZ43-5KzUr9Q_18szJcqLOU/pub?gid=384282536&single=true&output=csv';
 
             // In-memory cache
             let studentRows = []; // array of row objects
@@ -450,25 +720,6 @@
                 // We'll map by index. We must know their positions in the CSV.
                 // If your CSV includes all columns A.. etc, map by index accordingly:
                 // Let's defensively split and index.
-                function splitCSVLine(line) {
-                    // Light parser: split by comma, handle basic quoted fields
-                    const out = [];
-                    let cur = '';
-                    let inQ = false;
-                    for (let i = 0; i < line.length; i++) {
-                        const ch = line[i];
-                        if (ch === '"') {
-                            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
-                            else inQ = !inQ;
-                        } else if (ch === ',' && !inQ) {
-                            out.push(cur); cur = '';
-                        } else {
-                            cur += ch;
-                        }
-                    }
-                    out.push(cur);
-                    return out.map(s => s.trim());
-                }
 
                 // We don't know exact column count/order beyond your mapping, so we'll derive indices once from header row if it exists.
                 // If the published CSV includes headers, use them; otherwise, fall back to fixed positions.
@@ -505,6 +756,56 @@
                 }).filter(r => r.studentId); // keep only rows with ID
                 return studentRows;
             }
+
+            // CSV fetch helpers for WhatsApp sharing
+            async function fetchCSV(url) {
+                for (let i = 0; i < 2; i++) {
+                    try {
+                        const res = await fetch(url, { cache: 'no-store' });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return await res.text();
+                    } catch (e) {
+                        if (i === 1) throw e;
+                        await new Promise(r => setTimeout(r, 400));
+                    }
+                }
+            }
+
+            function parseCSVWithHeader(text) {
+                const lines = text.split(/\r?\n/).filter(Boolean);
+                if (!lines.length) return { header: [], rows: [] };
+                const header = splitCSVLine(lines.shift());
+                const rows = lines.map(line => splitCSVLine(line));
+                return { header, rows };
+            }
+
+            // Helper function to split CSV lines (moved outside fetchStudents for reuse)
+            function splitCSVLine(line) {
+                // Light parser: split by comma, handle basic quoted fields
+                const out = [];
+                let cur = '';
+                let inQ = false;
+                for (let i = 0; i < line.length; i++) {
+                    const ch = line[i];
+                    if (ch === '"') {
+                        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+                        else inQ = !inQ;
+                    } else if (ch === ',' && !inQ) {
+                        out.push(cur); cur = '';
+                    } else {
+                        cur += ch;
+                    }
+                }
+                out.push(cur);
+                return out.map(s => s.trim());
+            }
+
+
+
+
+
+
+
 
             // Helpers
             function showMessage(message, type = 'success') {
@@ -585,6 +886,28 @@
                 if (feeSummaryEl) feeSummaryEl.style.display = '';
             }
 
+            // Success modal helpers
+            function openSuccessModal(msg, submission) {
+                const now = new Date();
+                const dt = now.toLocaleString('en-IN', { hour12: true });
+                successDateTime.textContent = dt;
+
+                document.getElementById('successMessageText').textContent = msg || 'Success';
+
+                // Fill preview fields
+                smStudent.textContent = submission.studentId && submission.studentName
+                    ? `${submission.studentId} — ${submission.studentName}`
+                    : (submission.studentId || submission.studentName || '—');
+                smCourse.textContent = submission.courseName || '—';
+                smAmount.textContent = submission.amount ? `₹${submission.amount}` : '—';
+
+                successModal.classList.add('show');
+            }
+
+            function closeSuccessModal() {
+                successModal.classList.remove('show');
+            }
+
             function updateFeeSummaryForMatches(matches, selectedCourse) {
                 if (!matches || matches.length === 0) {
                     hideFeeSummary();
@@ -657,6 +980,115 @@
 
             // Initialize pill states
             toggleTypePills();
+
+            // Success modal event listeners
+            btnShareWA.addEventListener('click', async () => {
+                try {
+                    // Ensure required fields exist
+                    const sid = (lastSubmission.studentId || '').trim();
+                    const course = (lastSubmission.courseName || '').trim();
+                    if (!sid) {
+                        showMessage('Student ID missing for WhatsApp share.', 'error');
+                        return;
+                    }
+
+                    // Fetch meta CSV (with retry)
+                    const metaText = await fetchCSV(META_CSV_URL);
+                    const meta = parseCSVWithHeader(metaText);
+
+                    // Find columns (fallback indexes if headers not found)
+                    const mh = meta.header.map(h => h.trim());
+                    const idx = {
+                        studentId: mh.findIndex(h => /student\s*id/i.test(h)),
+                        courseName: mh.findIndex(h => /course\s*name/i.test(h)),
+                        phone: mh.findIndex(h => /phone|mobile|contact/i.test(h)),   // E
+                        fees: mh.findIndex(h => /fees|fee\s*amount/i.test(h)),       // L
+                        paid: mh.findIndex(h => /paid/i.test(h)),                    // M
+                    };
+                    const fb = { studentId: 1, courseName: 9, phone: 4, fees: 11, paid: 12 };
+
+                    const idCol = idx.studentId >= 0 ? idx.studentId : fb.studentId;
+                    const courseCol = idx.courseName >= 0 ? idx.courseName : fb.courseName;
+                    const phoneCol = idx.phone >= 0 ? idx.phone : fb.phone;
+                    const feesCol = idx.fees >= 0 ? idx.fees : fb.fees;
+                    const paidCol = idx.paid >= 0 ? idx.paid : fb.paid;
+
+                    const match = meta.rows.find(r =>
+                        (r[idCol] || '').toLowerCase() === sid.toLowerCase() &&
+                        (!course || (r[courseCol] || '').toLowerCase() === course.toLowerCase())
+                    );
+                    if (!match) {
+                        showMessage('Could not find student details for WhatsApp share.', 'error');
+                        return;
+                    }
+
+                    // Phone normalize
+                    let phone = String(match[phoneCol] || '').replace(/\D/g, '');
+                    if (phone.startsWith('0')) phone = phone.slice(1);
+                    if (!phone.startsWith('91')) phone = '91' + phone;
+                    if (phone.length < 12) {
+                        showMessage('Invalid phone number for WhatsApp share.', 'error');
+                        return;
+                    }
+
+                    // Fees/Paid/Due
+                    const fees = String(match[feesCol] || '');
+                    const paid = String(match[paidCol] || '');
+                    const toNum = v => {
+                        if (typeof v !== 'string') v = String(v ?? '');
+                        v = v.replace(/[,₹\s]/g, '');
+                        const n = parseFloat(v);
+                        return isNaN(n) ? 0 : n;
+                    };
+                    const due = Math.max(toNum(fees) - toNum(paid), 0);
+
+                    // Payments CSV for receipt link
+                    const payText = await fetchCSV(PAYMENTS_CSV_URL);
+                    const pay = parseCSVWithHeader(payText);
+                    const ph = pay.header.map(h => h.trim());
+                    const pidx = {
+                        type: ph.findIndex(h => /^type$/i.test(h)),
+                        studentId: ph.findIndex(h => /^student\s*id$/i.test(h)),
+                        courseName: ph.findIndex(h => /^course\s*name$/i.test(h)),
+                        receiptLink: ph.findIndex(h => /^receipt\s*link$/i.test(h)), // M
+                    };
+                    const pfb = { type: 1, studentId: 2, courseName: 8, receiptLink: 12 };
+                    const typeCol = pidx.type >= 0 ? pidx.type : pfb.type;
+                    const sidCol = pidx.studentId >= 0 ? pidx.studentId : pfb.studentId;
+                    const pcourseCol = pidx.courseName >= 0 ? pidx.courseName : pfb.courseName;
+                    const linkCol = pidx.receiptLink >= 0 ? pidx.receiptLink : pfb.receiptLink;
+
+                    const filtered = pay.rows.filter(r =>
+                        (r[typeCol] || '').toLowerCase() === 'payments' &&
+                        (r[sidCol] || '').toLowerCase() === sid.toLowerCase() &&
+                        (!course || (r[pcourseCol] || '').toLowerCase() === course.toLowerCase())
+                    );
+                    const receiptLink = filtered.length ? (filtered[filtered.length - 1][linkCol] || '') : '';
+
+                    // Compose message and redirect to wa.me
+                    const msg = [
+                        "Great news! Your payment receipt is ready—check out the attached link!",
+                        receiptLink ? receiptLink : '',
+                        `Current status: Balance Due — '${due}'.`,
+                        "Don't worry, you're just a click away from wrapping this up."
+                    ].filter(Boolean).join('\n\n');
+
+                    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+
+                    // Top-level navigation (avoid iframe)
+                    window.location.href = waUrl;
+                } catch (e) {
+                    console.error('WA share error', e);
+                    showMessage('Unable to prepare WhatsApp message. Please try again.', 'error');
+                }
+            });
+
+            btnDone.addEventListener('click', () => closeSuccessModal());
+
+            // Also close on overlay click (optional)
+            successModal.addEventListener('click', (e) => {
+                if (e.target === successModal) closeSuccessModal();
+            });
 
             // Main: lookup on Student ID change/blur
             const studentIdEl = document.getElementById('studentId');
@@ -876,7 +1308,19 @@
                         body: JSON.stringify(data),
                     });
 
-                    showMessage('Data submitted successfully! Check your Google Sheet.', 'success');
+                    // Assume success (no-cors)
+                    lastSubmission = {
+                        studentId: data.studentId,
+                        studentName: data.studentName,
+                        courseName: data.courseName,
+                        amount: data.amount,
+                        receiptLink: '' // fill later if backend returns it
+                    };
+
+                    // Open modal
+                    openSuccessModal('Data submitted successfully! Receipt will be available shortly.', lastSubmission);
+
+                    // Clear form after showing modal
                     form.reset();
                     paymentsCheckbox.checked = false;
                     refundsCheckbox.checked = false;
@@ -890,6 +1334,10 @@
                     // Clear error states after successful reset
                     document.querySelectorAll('.has-error').forEach(n => n.classList.remove('has-error'));
                     document.getElementById('typeHelper').style.display = 'none';
+                    hideFeeSummary();
+                    clearSelectIfAny('field-courseName');
+                    clearSelectIfAny('field-batchNo');
+                    amountTouched = false;
                 }
             });
 
