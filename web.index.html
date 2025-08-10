@@ -281,6 +281,7 @@
         .fee-summary-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         
         .fee-summary-table th,
@@ -288,18 +289,40 @@
             padding: clamp(8px, 2.2vw, 10px) clamp(10px, 2.5vw, 12px);
             text-align: left;
             border-bottom: 1px solid #f1f5f9;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            min-width: 0;
         }
         
         .fee-summary-table th {
             font-size: clamp(0.8rem, 2.2vw, 0.88rem);
             color: #6b7280;
             font-weight: 700;
+            white-space: nowrap;
         }
         
         .fee-summary-table td {
             font-size: clamp(0.85rem, 2.5vw, 0.95rem);
             color: #111827;
             font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Ensure amounts are fully visible on mobile */
+        .fee-summary-table td:last-child {
+            text-align: right;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+        }
+        
+        .fee-summary-table td:nth-child(2) {
+            text-align: right;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
         }
         
         .fee-muted {
@@ -461,6 +484,77 @@
             /* Bottom-aligned primary actions for thumb reach */
             .section:last-child {
                 padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+            }
+            
+            /* Mobile fee summary improvements */
+            .fee-summary {
+                margin: 0 var(--space-2) var(--space-1);
+                border-radius: 8px;
+            }
+            
+            .fee-summary-table th,
+            .fee-summary-table td {
+                padding: clamp(6px, 2vw, 8px) clamp(8px, 2.5vw, 10px);
+                font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+            }
+            
+            .fee-summary-table th {
+                font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+            }
+            
+            /* Ensure amounts are fully visible on very small screens */
+            .fee-summary-table td {
+                max-width: none;
+                white-space: normal;
+                word-break: break-all;
+            }
+            
+            .fee-summary-table td:last-child,
+            .fee-summary-table td:nth-child(2) {
+                text-align: right;
+                white-space: nowrap;
+                word-break: keep-all;
+            }
+        }
+        
+        /* Extra small mobile devices */
+        @media (max-width: 375px) {
+            .fee-summary {
+                margin: 0 8px 8px;
+                border-radius: 6px;
+            }
+            
+            .fee-summary-table th,
+            .fee-summary-table td {
+                padding: 6px 8px;
+                font-size: 0.75rem;
+            }
+            
+            .fee-summary-table th {
+                font-size: 0.7rem;
+            }
+            
+            /* Force single line for amounts on very small screens */
+            .fee-summary-table td {
+                white-space: nowrap;
+                overflow: visible;
+                text-overflow: clip;
+            }
+            
+            /* Ensure proper column widths */
+            .fee-summary-table th:nth-child(1),
+            .fee-summary-table td:nth-child(1) {
+                width: 33%;
+            }
+            
+            .fee-summary-table th:nth-child(2),
+            .fee-summary-table td:nth-child(2) {
+                width: 33%;
+            }
+            
+            .fee-summary-table th:nth-child(3),
+            .fee-summary-table td:nth-child(3) {
+                width: 34%;
             }
         }
         
