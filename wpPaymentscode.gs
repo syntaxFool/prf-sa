@@ -29,8 +29,8 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     Logger.log("Received data (before ID): " + JSON.stringify(data));
 
-    // Generate a unique Reference ID and add it to the data object
-    const referenceId = Utilities.getUuid();
+    // Generate a unique Reference ID in format AA11AA1111-100825
+    const referenceId = generateReferenceId();
     data.referenceId = referenceId; // Add the new ID to your data object
     Logger.log("Generated Reference ID: " + referenceId);
     Logger.log("Received data (after ID): " + JSON.stringify(data));
@@ -84,4 +84,37 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+function generateReferenceId() {
+  // Generate random letters and numbers for the first part
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numbers = '0123456789';
+  
+  let firstPart = '';
+  // First 2 characters: random letters
+  for (let i = 0; i < 2; i++) {
+    firstPart += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  // Next 2 characters: random numbers
+  for (let i = 0; i < 2; i++) {
+    firstPart += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  }
+  // Next 2 characters: random letters
+  for (let i = 0; i < 2; i++) {
+    firstPart += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  // Next 4 characters: random numbers
+  for (let i = 0; i < 4; i++) {
+    firstPart += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  }
+  
+  // Generate timestamp part (current date in format MMDDYY)
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const year = String(now.getFullYear()).slice(-2);
+  const timestamp = month + day + year;
+  
+  return firstPart + '-' + timestamp;
 }
